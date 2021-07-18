@@ -1,5 +1,11 @@
 class FloatNum:
     def __init__(self,number,exp_bits=8,man_bits=23):
+
+        self.bias = (2**(exp_bits-1)) - 1
+        self.sign = int(number<0)
+        self.man_bits = man_bits
+        self.exp_bits = exp_bits
+
         exp = 0
         mod_number = number if number>0 else number*-1
         if(mod_number>1):
@@ -7,23 +13,19 @@ class FloatNum:
                 mod_number = mod_number/2
                 exp = exp+1
         elif(mod_number==0):
-            exp=0
+            exp= -1 * self.bias
         else:
             while(mod_number<1):
                 mod_number = mod_number*2
                 exp = exp-1
 
-        man = mod_number-1
+        man = max(mod_number-1,0)
         self.mantissa = 0
         for i in range(man_bits):
             self.mantissa = (self.mantissa<<1)+int(man*2)
             man = man*2 - int(man*2)
 
-        self.bias = (2**(exp_bits-1)) - 1
-        self.sign = int(number<0)
         self.exp = exp + self.bias
-        self.man_bits = man_bits
-        self.exp_bits = exp_bits
 
     def add(self,number):
         exp1 = self.exp
@@ -113,8 +115,8 @@ class FloatNum:
 
     def show_num(self,to_print=True):
         if(to_print==True):
-            print(2**(self.exp-self.man_bits-self.bias)*(self.mantissa | (1<<(self.man_bits))) * (pow(-1,self.sign)),end=' ')
-        return(2**(self.exp-self.man_bits-self.bias)*(self.mantissa | (1<<(self.man_bits))) * (pow(-1,self.sign)))
+            print(2**(self.exp-self.man_bits-self.bias)*(self.mantissa | ((1<<(self.man_bits))*int(self.exp!=0))) * (pow(-1,self.sign)),end=' ')
+        return(2**(self.exp-self.man_bits-self.bias)*(self.mantissa | ((1<<(self.man_bits))*int(self.exp!=0))) * (pow(-1,self.sign)))
 
     def re_init_num(self,sign,exp,mantissa):
         self.sign = sign
